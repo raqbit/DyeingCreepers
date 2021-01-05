@@ -1,7 +1,7 @@
-package it.raqb.dyeingcreepers.network;
+package it.raqb.dyeingcreepers.common.network;
 
 import it.raqb.dyeingcreepers.DyeingCreepers;
-import it.raqb.dyeingcreepers.network.packets.SyncDyeablePacket;
+import it.raqb.dyeingcreepers.common.network.packets.SyncDyeablePacket;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;

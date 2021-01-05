@@ -1,7 +1,7 @@
-package it.raqb.dyeingcreepers.capabilities.dyeablecreeper;
+package it.raqb.dyeingcreepers.common.capabilities.dyeablecreeper;
 
 import it.raqb.dyeingcreepers.DyeingCreepers;
-import it.raqb.dyeingcreepers.capabilities.Capabilities;
+import it.raqb.dyeingcreepers.common.capabilities.Capabilities;
 import net.minecraft.item.DyeColor;
 import net.minecraft.nbt.IntNBT;
 import net.minecraft.util.Direction;

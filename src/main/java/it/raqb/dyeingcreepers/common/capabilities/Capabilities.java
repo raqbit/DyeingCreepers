@@ -1,7 +1,7 @@
-package it.raqb.dyeingcreepers.capabilities;
+package it.raqb.dyeingcreepers.common.capabilities;
 
-import it.raqb.dyeingcreepers.capabilities.dyeablecreeper.Dyeable;
-import it.raqb.dyeingcreepers.capabilities.dyeablecreeper.IDyeable;
+import it.raqb.dyeingcreepers.common.capabilities.dyeablecreeper.Dyeable;
+import it.raqb.dyeingcreepers.common.capabilities.dyeablecreeper.IDyeable;
 import net.minecraft.item.DyeColor;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.IntNBT;
@@ -25,6 +25,6 @@ public class Capabilities {
             public void readNBT(Capability<IDyeable> capability, IDyeable instance, Direction side, INBT nbt) {
                 instance.deserializeNBT((IntNBT) nbt);
             }
-        }, () -> new Dyeable(DyeColor.GREEN));
+        }, () -> new Dyeable(DyeColor.LIME));
     }
 }

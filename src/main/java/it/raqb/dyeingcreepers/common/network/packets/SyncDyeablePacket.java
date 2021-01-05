@@ -1,20 +1,17 @@
-package it.raqb.dyeingcreepers.network.packets;
+package it.raqb.dyeingcreepers.common.network.packets;
 
-import it.raqb.dyeingcreepers.capabilities.Capabilities;
+import it.raqb.dyeingcreepers.common.capabilities.Capabilities;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.DyeColor;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.network.NetworkEvent;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.function.Supplier;
 
 public class SyncDyeablePacket {
 
-    private static final Logger LOGGER = LogManager.getLogger();
     private int entityId;
     private int color;
 
