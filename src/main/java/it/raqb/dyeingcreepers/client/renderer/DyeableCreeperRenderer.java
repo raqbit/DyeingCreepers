@@ -15,7 +15,9 @@ import java.util.Map;
 public class DyeableCreeperRenderer extends CreeperRenderer {
     private final Map<DyeColor, ResourceLocation> TEXTURE_LOOKUP = new EnumMap<>(DyeColor.class);
 
-    {
+    public DyeableCreeperRenderer(EntityRendererManager renderManagerIn) {
+        super(renderManagerIn);
+
         for (DyeColor value : DyeColor.values()) {
 
             // Skip lime, use default texture
@@ -25,10 +27,6 @@ public class DyeableCreeperRenderer extends CreeperRenderer {
 
             TEXTURE_LOOKUP.put(value, DyeingCreepers.resource(String.format("textures/entity/creeper/creeper_%s.png", value.getTranslationKey())));
         }
-    }
-
-    public DyeableCreeperRenderer(EntityRendererManager renderManagerIn) {
-        super(renderManagerIn);
     }
 
     @Nonnull
