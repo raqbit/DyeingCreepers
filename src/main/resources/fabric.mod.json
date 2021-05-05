@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "dyeingcreepers",
+  "version": "${version}",
+  "name": "Dyeing Creepers",
+  "description": "Allows you to dye creepers, it's that simple...",
+  "authors": [
+    "Raqbit"
+  ],
+  "contact": {
+    "sources": "https://github.com/Raqbit/DyeingCreepers"
+  },
+  "license": "MIT",
+  "icon": "assets/dyeingcreepers/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "it.raqb.dyeingcreepers.fabric.DyeingCreepersMod"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.8.7",
+    "fabric": "*",
+    "minecraft": "1.16.x"
+  }
+}
