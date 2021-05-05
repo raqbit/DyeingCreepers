@@ -4,9 +4,11 @@
   "package": "it.raqb.dyeingcreepers.fabric.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+    "entity.CreeperEntityMixin",
+    "item.DyeItemMixin"
   ],
   "client": [
-    "ExampleMixin"
+    "render.CreeperEntityRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1
