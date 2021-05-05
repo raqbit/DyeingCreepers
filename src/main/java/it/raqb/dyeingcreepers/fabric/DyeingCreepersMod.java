@@ -1,7 +1,7 @@
 package it.raqb.dyeingcreepers.fabric;
 
 import net.fabricmc.api.ModInitializer;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 public class DyeingCreepersMod implements ModInitializer {
 
@@ -11,7 +11,7 @@ public class DyeingCreepersMod implements ModInitializer {
     public void onInitialize() {
     }
 
-    public static Identifier resource(String name) {
-        return new Identifier(MOD_ID, name);
+    public static ResourceLocation resource(String name) {
+        return new ResourceLocation(MOD_ID, name);
     }
 }

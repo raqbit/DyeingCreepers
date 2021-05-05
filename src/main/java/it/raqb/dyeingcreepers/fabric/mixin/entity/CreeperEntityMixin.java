@@ -1,19 +1,19 @@
 package it.raqb.dyeingcreepers.fabric.mixin.entity;
 
 import it.raqb.dyeingcreepers.fabric.IDyeableCreeper;
-import net.minecraft.entity.EntityData;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.SpawnReason;
-import net.minecraft.entity.data.DataTracker;
-import net.minecraft.entity.data.TrackedData;
-import net.minecraft.entity.data.TrackedDataHandlerRegistry;
-import net.minecraft.entity.mob.CreeperEntity;
-import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.util.DyeColor;
-import net.minecraft.world.LocalDifficulty;
-import net.minecraft.world.ServerWorldAccess;
-import net.minecraft.world.World;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.monster.Creeper;
+import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerLevelAccessor;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -25,13 +25,13 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-@Mixin(CreeperEntity.class)
-public class CreeperEntityMixin extends HostileEntity implements IDyeableCreeper {
+@Mixin(Creeper.class)
+public class CreeperEntityMixin extends Monster implements IDyeableCreeper {
 
     /**
      * Tracks data of the Creeper
      */
-    private static final TrackedData<Byte> COLOR;
+    private static final EntityDataAccessor<Byte> COLOR;
 
     /**
      * All colors except lime, the colors that can be picked at random for a natural Creeper
@@ -39,20 +39,20 @@ public class CreeperEntityMixin extends HostileEntity implements IDyeableCreeper
     private static final List<DyeColor> RANDOM_COLORS;
 
     static {
-        COLOR = DataTracker.registerData(CreeperEntity.class, TrackedDataHandlerRegistry.BYTE);
+        COLOR = SynchedEntityData.defineId(Creeper.class, EntityDataSerializers.BYTE);
 
         RANDOM_COLORS = Arrays.stream(DyeColor.values())
                 .filter(dye -> dye != DyeColor.LIME)
                 .collect(Collectors.toList());
     }
 
-    protected CreeperEntityMixin(EntityType<? extends HostileEntity> entityType, World world) {
-        super(entityType, world);
+    protected CreeperEntityMixin(EntityType<? extends Monster> entityType, Level level) {
+        super(entityType, level);
     }
 
-    @Inject(method = "initDataTracker()V", at = @At("TAIL"))
-    private void initDataTracker(CallbackInfo ci) {
-        this.dataTracker.startTracking(COLOR, (byte) 0);
+    @Inject(method = "defineSynchedData", at = @At("TAIL"))
+    private void defineSynchedData(CallbackInfo ci) {
+        this.entityData.define(COLOR, (byte) 0);
     }
 
     /**
@@ -61,7 +61,7 @@ public class CreeperEntityMixin extends HostileEntity implements IDyeableCreeper
      * @return The Creeper's color
      */
     public DyeColor getColor() {
-        return DyeColor.byId(this.dataTracker.get(COLOR));
+        return DyeColor.byId(this.entityData.get(COLOR));
     }
 
     /**
@@ -70,7 +70,7 @@ public class CreeperEntityMixin extends HostileEntity implements IDyeableCreeper
      * @param color The color to give the Creeper
      */
     public void setColor(DyeColor color) {
-        this.dataTracker.set(COLOR, (byte) color.getId());
+        this.entityData.set(COLOR, (byte) color.getId());
     }
 
     /**
@@ -80,9 +80,9 @@ public class CreeperEntityMixin extends HostileEntity implements IDyeableCreeper
      * @param reason Reason the mob spawned
      * @return The random Creeper color that was generated
      */
-    private static DyeColor generateDefaultColor(Random random, SpawnReason reason) {
+    private static DyeColor generateDefaultColor(Random random, MobSpawnType reason) {
         // 5% chance a natural spawning creeper has a random (non-lime) color
-        if (reason == SpawnReason.NATURAL && random.nextInt(100) < 5) {
+        if (reason == MobSpawnType.NATURAL && random.nextInt(100) < 5) {
             return RANDOM_COLORS.get(random.nextInt(RANDOM_COLORS.size()));
         } else {
             return DyeColor.LIME;
@@ -90,24 +90,24 @@ public class CreeperEntityMixin extends HostileEntity implements IDyeableCreeper
     }
 
     @Nullable
-    public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable CompoundTag entityTag) {
-        this.setColor(generateDefaultColor(world.getRandom(), spawnReason));
-        return super.initialize(world, difficulty, spawnReason, entityData, entityTag);
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
+        this.setColor(generateDefaultColor(level.getRandom(), mobSpawnType));
+        return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
 
     @Inject(
-            method = "writeCustomDataToTag",
+            method = "addAdditionalSaveData",
             at = @At("TAIL")
     )
-    private void writeCustomDataToTag(CompoundTag tag, CallbackInfo ci) {
+    private void addAdditionalSaveData(CompoundTag tag, CallbackInfo ci) {
         tag.putByte("Color", (byte) this.getColor().getId());
     }
 
     @Inject(
-            method = "readCustomDataFromTag",
+            method = "readAdditionalSaveData",
             at = @At("TAIL")
     )
-    private void readCustomDataFromTag(CompoundTag tag, CallbackInfo ci) {
+    private void readAdditionalSaveData(CompoundTag tag, CallbackInfo ci) {
         this.setColor(DyeColor.byId(tag.getByte("Color")));
     }
 }

@@ -2,10 +2,10 @@ package it.raqb.dyeingcreepers.fabric.mixin.render;
 
 import it.raqb.dyeingcreepers.fabric.DyeingCreepersMod;
 import it.raqb.dyeingcreepers.fabric.IDyeableCreeper;
-import net.minecraft.client.render.entity.CreeperEntityRenderer;
-import net.minecraft.entity.mob.CreeperEntity;
-import net.minecraft.util.DyeColor;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.renderer.entity.CreeperRenderer;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.monster.Creeper;
+import net.minecraft.world.item.DyeColor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.injection.At;
@@ -15,9 +15,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.EnumMap;
 import java.util.Map;
 
-@Mixin(CreeperEntityRenderer.class)
+@Mixin(CreeperRenderer.class)
 public class CreeperEntityRendererMixin {
-    private static final Map<DyeColor, Identifier> TEXTURE_LOOKUP = new EnumMap<>(DyeColor.class);
+    private static final Map<DyeColor, ResourceLocation> TEXTURE_LOOKUP = new EnumMap<>(DyeColor.class);
 
     static {
         for (DyeColor value : DyeColor.values()) {
@@ -32,17 +32,17 @@ public class CreeperEntityRendererMixin {
         }
     }
 
-    @Accessor("TEXTURE")
-    private static Identifier getDefaultTexture() {
+    @Accessor("CREEPER_LOCATION")
+    private static ResourceLocation getDefaultTexture() {
         throw new AssertionError();
     }
 
     @Inject(
-            method = "getTexture",
+            method = "getTextureLocation",
             at = @At("RETURN"),
             cancellable = true
     )
-    private void getTexture(CreeperEntity creeperEntity, CallbackInfoReturnable<Identifier> cir) {
+    private void getTextureLocation(Creeper creeperEntity, CallbackInfoReturnable<ResourceLocation> cir) {
         if (creeperEntity instanceof IDyeableCreeper) {
             IDyeableCreeper creeper = (IDyeableCreeper) creeperEntity;
             cir.setReturnValue(TEXTURE_LOOKUP.get(creeper.getColor()));

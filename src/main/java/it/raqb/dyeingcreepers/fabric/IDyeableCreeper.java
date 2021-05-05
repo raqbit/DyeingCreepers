@@ -1,6 +1,5 @@
 package it.raqb.dyeingcreepers.fabric;
-
-import net.minecraft.util.DyeColor;
+import net.minecraft.world.item.DyeColor;
 
 public interface IDyeableCreeper {
     DyeColor getColor();
