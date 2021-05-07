@@ -14,8 +14,11 @@
   "icon": "assets/dyeingcreepers/icon.png",
   "environment": "*",
   "entrypoints": {
-    "main": [
-      "it.raqb.dyeingcreepers.fabric.DyeingCreepersMod"
+    "server": [
+      "it.raqb.dyeingcreepers.fabric.VersionCheck"
+    ],
+    "client": [
+      "it.raqb.dyeingcreepers.fabric.VersionCheck"
     ]
   },
   "mixins": [
