@@ -12,21 +12,20 @@ import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerLoginConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerLoginNetworking;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientLoginNetworkHandler;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerLoginPacketListenerImpl;
-
+import net.minecraft.server.network.ServerLoginNetworkHandler;
+import net.minecraft.text.LiteralText;
+import net.minecraft.util.Identifier;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 public class VersionCheck implements DedicatedServerModInitializer, ClientModInitializer {
     public static final int PROTOCOL_VERSION = 1;
-    public static final ResourceLocation VERSION_CHECK = DyeingCreepersMod.resource("version_check");
-    private static final TextComponent INCORRECT_VERSION = new TextComponent(String.format("Please install DyeingCreepers %d.x.x to play on this server.", PROTOCOL_VERSION));
+    public static final Identifier VERSION_CHECK = DyeingCreepersMod.resource("version_check");
+    private static final LiteralText INCORRECT_VERSION = new LiteralText(String.format("Please install DyeingCreepers %d.x.x to play on this server.", PROTOCOL_VERSION));
 
     @Override
     public void onInitializeServer() {
@@ -43,7 +42,7 @@ public class VersionCheck implements DedicatedServerModInitializer, ClientModIni
     /**
      * On login start, send VERSION_CHECK request
      */
-    private void onLoginStart(ServerLoginPacketListenerImpl serverLoginPacketListener, MinecraftServer server, PacketSender sender, ServerLoginNetworking.LoginSynchronizer sync) {
+    private void onLoginStart(ServerLoginNetworkHandler serverLoginPacketListener, MinecraftServer server, PacketSender sender, ServerLoginNetworking.LoginSynchronizer sync) {
         sender.sendPacket(VERSION_CHECK, PacketByteBufs.empty());
     }
 
@@ -51,8 +50,8 @@ public class VersionCheck implements DedicatedServerModInitializer, ClientModIni
      * On VERSION_CHECK request from a dedicated server, send response with current PROTOCOL_VERSION
      */
     @Environment(EnvType.CLIENT)
-    private CompletableFuture<FriendlyByteBuf> onServerRequest(Minecraft minecraft, ClientHandshakePacketListenerImpl listener, FriendlyByteBuf inBuf, Consumer<GenericFutureListener<? extends Future<? super Void>>> consumer) {
-        FriendlyByteBuf outBuf = new FriendlyByteBuf(Unpooled.buffer());
+    private CompletableFuture<PacketByteBuf> onServerRequest(MinecraftClient minecraft, ClientLoginNetworkHandler listener, PacketByteBuf inBuf, Consumer<GenericFutureListener<? extends Future<? super Void>>> consumer) {
+        PacketByteBuf outBuf = new PacketByteBuf(Unpooled.buffer());
         outBuf.writeInt(PROTOCOL_VERSION);
         return CompletableFuture.completedFuture(outBuf);
     }
@@ -61,7 +60,7 @@ public class VersionCheck implements DedicatedServerModInitializer, ClientModIni
      * Handle the VERSION_CHECK response from the client.
      * If the client did not respond (in time) or if the version is incorrect, disconnect
      */
-    private void onClientResponse(MinecraftServer server, ServerLoginPacketListenerImpl listener, boolean understood, FriendlyByteBuf buf, ServerLoginNetworking.LoginSynchronizer loginSynchronizer, PacketSender packetSender) {
+    private void onClientResponse(MinecraftServer server, ServerLoginNetworkHandler listener, boolean understood, PacketByteBuf buf, ServerLoginNetworking.LoginSynchronizer loginSynchronizer, PacketSender packetSender) {
         if (!understood) {
             // Client did not respond in time, disconnect client.
             listener.disconnect(INCORRECT_VERSION);

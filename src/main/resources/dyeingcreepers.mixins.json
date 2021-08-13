@@ -2,13 +2,14 @@
   "required": true,
   "minVersion": "0.8",
   "package": "it.raqb.dyeingcreepers.fabric.mixin",
-  "compatibilityLevel": "JAVA_8",
+  "compatibilityLevel": "JAVA_16",
   "mixins": [
     "entity.CreeperEntityMixin",
     "item.DyeItemMixin"
   ],
   "client": [
-    "render.CreeperEntityRendererMixin"
+    "render.CreeperEntityRendererMixin",
+    "render.EntityRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1
