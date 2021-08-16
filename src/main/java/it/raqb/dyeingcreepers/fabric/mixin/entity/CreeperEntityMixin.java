@@ -10,14 +10,12 @@ import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.entity.mob.CreeperEntity;
 import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.DyeItem;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
@@ -34,8 +32,6 @@ import java.util.stream.Collectors;
 
 @Mixin(CreeperEntity.class)
 public class CreeperEntityMixin extends HostileEntity implements IDyeableCreeper {
-
-    private static final Identifier GLOW_INK_SAC = new Identifier("minecraft", "glow_ink_sac");
 
     /**
      * Tracks data of the Creeper
@@ -63,7 +59,7 @@ public class CreeperEntityMixin extends HostileEntity implements IDyeableCreeper
 
     @Inject(method = "initDataTracker", at = @At("TAIL"))
     private void initDataTracker(CallbackInfo ci) {
-        this.dataTracker.startTracking(COLOR, (byte) 0);
+        this.dataTracker.startTracking(COLOR, (byte) DyeColor.LIME.getId());
         this.dataTracker.startTracking(GLOWING, false);
     }
 
@@ -76,6 +72,11 @@ public class CreeperEntityMixin extends HostileEntity implements IDyeableCreeper
         return DyeColor.byId(this.dataTracker.get(COLOR));
     }
 
+    /**
+     * Get the Creeper's glow status
+     *
+     * @return The Creeper's glow status
+     */
     public boolean getGlow() {
         return this.dataTracker.get(GLOWING);
     }
@@ -89,25 +90,34 @@ public class CreeperEntityMixin extends HostileEntity implements IDyeableCreeper
         this.dataTracker.set(COLOR, (byte) color.getId());
     }
 
+    /**
+     * Set the Creeper's glow status
+     *
+     * @param glowing Whether the Creeper should be glowing
+     */
     public void setGlow(boolean glowing) {
         this.dataTracker.set(GLOWING, glowing);
     }
 
     @Override
-    public ActionResult interactAt(PlayerEntity player, Vec3d hitPos, Hand hand) {
-        var playerItem = player.getMainHandStack().getItem();
-        if(!this.getGlow() && Registry.ITEM.getId(playerItem).equals(GLOW_INK_SAC)) {
+    public ActionResult interactMob(PlayerEntity player, Hand hand) {
+        ItemStack itemStack = player.getStackInHand(hand);
+
+        if (!itemStack.isOf(Items.GLOW_INK_SAC) || this.getGlow()) {
+            return ActionResult.PASS;
+        } else {
             if (player.world.isClient) {
                 return ActionResult.CONSUME;
             } else {
                 this.setGlow(true);
-                if(!player.getAbilities().creativeMode) {
+
+                // Only decrement item if in survival or adventure
+                if (!player.getAbilities().creativeMode) {
                     player.getMainHandStack().decrement(1);
                 }
                 return ActionResult.SUCCESS;
             }
         }
-        return super.interactAt(player, hitPos, hand);
     }
 
     /**
